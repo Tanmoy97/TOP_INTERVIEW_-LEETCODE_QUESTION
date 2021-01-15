@@ -1,0 +1,107 @@
+Given two integers representing the numerator and denominator of a fraction, return the fraction in string format.
+
+If the fractional part is repeating, enclose the repeating part in parentheses.
+
+If multiple answers are possible, return any of them.
+
+It is guaranteed that the length of the answer string is less than 104 for all the given inputs.
+
+ 
+
+Example 1:
+
+Input: numerator = 1, denominator = 2
+Output: "0.5"
+Example 2:
+
+Input: numerator = 2, denominator = 1
+Output: "2"
+Example 3:
+
+Input: numerator = 2, denominator = 3
+Output: "0.(6)"
+Example 4:
+
+Input: numerator = 4, denominator = 333
+Output: "0.(012)"
+Example 5:
+
+Input: numerator = 1, denominator = 5
+Output: "0.2"
+ 
+
+Constraints:
+
+-2^31 <= numerator, denominator <= 2^31 - 1
+denominator != 0
+
+SOLUTION:
+
+
+class Solution {
+public:
+    string fractionToDecimal(int nums, int dens) {
+        
+        if (nums == 0 || dens == 0)
+            return "0";
+        else if(dens == 1)
+            return to_string(nums);
+       
+        //converting to long type to avoid overflow error for INT_MAX or INT_MIN
+        long num = abs((nums));
+        long den = abs((dens));
+        
+        //storing sign in string
+        string sign = "";
+        if((nums<0&&dens>0) || (dens<0&&nums>0)) sign = "-";
+        
+        //Keeping track of all remainders post decimal point
+        map <int,int> remlist;
+        //index value post decimal
+        int i=0;
+        //Returning string variable
+        string ans= "";
+        
+        //String to generate post decimal part
+        string decimal= "";
+        
+
+        int rem = 0;
+        //appending pre-decimal part
+        ans += to_string(num/den);
+        rem = num%den;
+        
+        //if not perfect division add decimal point
+        if((rem)!=0){
+            ans += ".";
+            
+        }
+        
+        num = rem*10;
+        while(num!=0){
+            if(remlist.count(num)<=0){
+                remlist[num] = i;
+            }else{
+                //if recurring return final result by adding decimal part with recurring part
+                return (sign+ans +decimal.substr(0,remlist[num])+"(" + decimal.substr(remlist[num],i-remlist[num]) + ")" );
+            }
+            
+            if(num<den){
+                remlist[num] = i;
+                decimal += "0";
+                num *= 10;
+                i++;
+            }else{
+                remlist[num] = i;
+                decimal += to_string(num/den);
+                num = (num%den) * 10;
+                i++;
+            }
+                
+        }
+        
+        
+        return sign+ans + decimal;
+        
+    }
+};
