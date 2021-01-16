@@ -1,0 +1,144 @@
+A linked list is given such that each node contains an additional random pointer which could point to any node in the list or null.
+
+Return a deep copy of the list.
+
+The Linked List is represented in the input/output as a list of n nodes. Each node is represented as a pair of [val, random_index] where:
+
+val: an integer representing Node.val
+random_index: the index of the node (range from 0 to n-1) where random pointer points to, or null if it does not point to any node.
+ 
+
+Example 1:
+
+
+Input: head = [[7,null],[13,0],[11,4],[10,2],[1,0]]
+Output: [[7,null],[13,0],[11,4],[10,2],[1,0]]
+Example 2:
+
+
+Input: head = [[1,1],[2,1]]
+Output: [[1,1],[2,1]]
+Example 3:
+
+
+
+Input: head = [[3,null],[3,0],[3,null]]
+Output: [[3,null],[3,0],[3,null]]
+Example 4:
+
+Input: head = []
+Output: []
+Explanation: Given linked list is empty (null pointer), so return null.
+ 
+
+Constraints:
+
+-10000 <= Node.val <= 10000
+Node.random is null or pointing to a node in the linked list.
+The number of nodes will not exceed 1000.
+
+SOLUTION:
+
+unordered_map<Node*, Node*> nodeMap;
+
+class Solution {
+public:
+    Node* copyRandomList(Node* head) {
+        if(!head) return NULL;
+        
+        Node* dummy = new Node(0);
+        Node* curnew = dummy;
+        Node* cur = head;
+        
+        while(cur){
+            curnew->next = new Node(cur->val);
+            nodeMap[cur] = curnew->next;
+            curnew = curnew->next;
+            cur = cur->next;
+        }
+        curnew = dummy->next;
+        cur = head;
+        while(cur){
+            curnew->random = nodeMap[cur->random];
+            curnew = curnew->next;
+            cur = cur->next;
+        }
+        
+        return dummy->next;
+    }
+};
+
+ANOTHER SOLUTION:
+
+class Solution {
+public:
+    Node* copyRandomList(Node* head) {
+        // if list is empty, result is empty
+        if(!head){
+            return head;
+        }
+        // append a node with same value after each node
+        Node* current = head;
+        while(current){
+            Node* newNode = new Node(current->val);
+            newNode->next = current->next;
+            current->next = newNode;
+            current = current->next->next;
+        }
+        // place the the random pointer of new added nodes at correct positions
+        current = head;
+        while(current){
+            if(current->random)
+                (current->next)->random = (current->random)->next;
+            current = current->next->next;
+        }
+        // seperate the new added nodes to a second list, mark its head by dummy->next
+        current = head;
+        Node* result = current->next;
+        Node* dummy = new Node(-1);
+        dummy->next = result;
+        while(current){
+            current->next = result->next;
+            current = current->next;
+            if(current)
+                result->next = current->next;
+            result = result->next;
+        }
+        result = dummy->next;
+        // delete dummy, as now we don't need that guy.
+        delete dummy;
+        return result;
+    }
+};
+
+
+ANOTHER SOLUTION:
+
+class Solution {
+public:
+    Node* copyRandomList(Node* head) {
+        unordered_map<Node*, int> map1;
+        unordered_map<int, Node*> map2;
+        Node* current = head;
+        Node* dummy = new Node(-1);
+        Node* newcurrent = dummy;
+        for(int i = 0; current ; i++){
+            map1[current] = i;
+            newcurrent->next = new Node(current->val);
+            newcurrent = newcurrent->next;
+            map2[i] = newcurrent;
+            current = current->next;
+        }
+        current = head;
+        newcurrent = dummy->next;
+        while(current){
+            if(current->random)
+                newcurrent->random = map2[map1[current->random]];
+            current = current->next;
+            newcurrent = newcurrent->next;
+        }
+        newcurrent = dummy->next;
+        delete dummy;
+        return newcurrent;
+    }
+};
